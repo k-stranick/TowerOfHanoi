@@ -13,41 +13,39 @@ public class Main extends Application {
 	private Stage primaryStage;
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/dtcc/itn262/towerofhanoi/SplashScreen.fxml"));
-		Parent splashRoot = loader.load();
-
-		SplashScreenController splashController = loader.getController();
-		splashController.setMainApp(this); // Allow splash screen to switch scenes
-		primaryStage.setTitle("Tower of Hanoi");
-		primaryStage.setScene(new Scene(splashRoot, 400, 300));
-		primaryStage.show();
+		showSplashScreen();
 	}
 
 	public static void main(String[] args) {
 		launch(args);
 	}
 
+	public void showSplashScreen() {
+		loadScene("/dtcc/itn262/towerofhanoi/SplashScreen.fxml", "Tower of Hanoi", 400, 300, SplashScreenController.class);
+	}
+
 	public void showGameScreen() {
+		loadScene("/dtcc/itn262/towerofhanoi/TowerOfHanoi.fxml", "Tower of Hanoi - Game", 600, 400, TowerOfHanoiController.class);
+	}
+
+	private <T> void loadScene(String fxmlPath, String title, int width, int height, Class<T> controllerClass) {
 		try {
-			// Load the FXML file for the game screen
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/dtcc/itn262/towerofhanoi/TowerOfHanoi.fxml"));
-			Parent gameRoot = loader.load();
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+			Parent root = loader.load();
+			primaryStage.setTitle(title);
+			primaryStage.setScene(new Scene(root, width, height));
 
-			// Retrieve the controller for the game screen
-			TowerOfHanoiController controller = loader.getController();
-
-			// Initialize the game with the number of disks from GameSettings
-			int numDisks = GameSettings.getInstance().getNumDisks();
-			controller.initializeGame(numDisks);  // Method in TowerOfHanoiController to set up the game
-
-			// Set up the scene and switch to it
-			Scene gameScene = new Scene(gameRoot, 600, 400);
-			primaryStage.setTitle("Tower of Hanoi - Game");
-			primaryStage.setScene(gameScene);
+			T controller = loader.getController();
+			if (controllerClass == SplashScreenController.class) {
+				((SplashScreenController) controller).setMainApp(this);
+			} else if (controllerClass == TowerOfHanoiController.class) {
+				((TowerOfHanoiController) controller).setMainApp(this);
+				int numDisks = GameSettings.getInstance().getNumDisks();
+				((TowerOfHanoiController) controller).initializeGame(numDisks);
+			}
 			primaryStage.show();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
