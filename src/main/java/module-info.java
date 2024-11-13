@@ -5,6 +5,7 @@ module dtcc.itn262.towerofhanoi {
 	requires org.controlsfx.controls;
 	requires com.dlsc.formsfx;
 	requires org.kordamp.bootstrapfx.core;
+	requires java.logging;
 
 	opens dtcc.itn262.towerofhanoi to javafx.fxml;
 	exports dtcc.itn262.towerofhanoi.main_menu;

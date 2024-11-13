@@ -28,7 +28,7 @@
             <TextArea fx:id="moveLog" editable="false" prefHeight="150" wrapText="true"/>
             <HBox>
                 <Button text="Restart Game" onAction="#resetHandler"/>
-                <Button text="Main Menu" onAction="#goBackToMainScreen"/>
+                <Button text="Back" onAction="#goBackToMainScreen"/>
             </HBox>
         </VBox>
     </bottom>
