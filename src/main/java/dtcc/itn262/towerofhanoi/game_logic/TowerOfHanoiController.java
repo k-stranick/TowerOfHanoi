@@ -20,7 +20,6 @@ public class TowerOfHanoiController {
 	private final Deque<Rectangle> tower1ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower2ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower3ArrayDeque = new ArrayDeque<>();
-
 	@FXML
 	private VBox tower1;
 	@FXML
@@ -29,9 +28,8 @@ public class TowerOfHanoiController {
 	private VBox tower3;
 	@FXML
 	private TextArea moveLog;
-
 	private VBox selectedTower; // tracks the tower that the user has selected
-	private Main mainApp;
+	private Main mainApp; // Reference to the main application
 
 	/**
 	 * Initializes the Tower of Hanoi game with the given number of disks.
@@ -86,27 +84,74 @@ public class TowerOfHanoiController {
 		return disk;
 	}
 
-
+	/**
+	 * Handles a tower click event, if no tower is currently selected, set the selected tower.
+	 * If a tower is already selected, attempts to move the disk to the clicked tower.
+	 *
+	 * @param clickedTower the tower clicked by the user
+	 * @param clickedTowerDisks the deque of disks on the clicked tower
+	 */
 	@FXML
-	private void handleTowerClick(VBox tower, Deque<Rectangle> towerArrayDeque) {
-		if (selectedTower == null && !towerArrayDeque.isEmpty()) {
-			Rectangle topDisk = towerArrayDeque.peek();
-			if (topDisk != null) {
-				moveLog.appendText("Picked up disk of width " + topDisk.getWidth() + " from Tower " + getTowerNumber(tower) + "\n");
-			}
-			selectedTower = tower; // Set the selected tower
-		} else if (selectedTower != null) {
-			// Move the disk to this tower if the move is valid
-			if (isValidMove(towerArrayDeque, selectedTower)) {
-				Rectangle movingDisk = getTopDisk(selectedTower);
-				moveLog.appendText("Moved disk of width " + (movingDisk != null ? movingDisk.getWidth() : "null") +
-						" to Tower " + getTowerNumber(tower) + "\n");
-				moveDisk(selectedTower, tower, towerArrayDeque);
-			} else {
-				moveLog.appendText("Invalid move. Cannot place larger disk on top of a smaller one.\n");
-			}
-			resetSelection();
+	private void handleTowerClick(VBox clickedTower, Deque<Rectangle> clickedTowerDisks) {
+		// If no tower is currently selected, set the clicked tower as the selected tower
+		if (selectedTower == null && !clickedTowerDisks.isEmpty()) {
+			selectedTower = setSelectedTower(clickedTower, clickedTowerDisks);
 		}
+		// If a tower is already selected, attempt to move the disk to the clicked tower
+		else if (selectedTower != null) {
+			attemptMove(clickedTower, clickedTowerDisks);
+		}
+	}
+
+	/**
+	 * Selects the specified tower and logs the selection of the top disk in the move log.
+	 *
+	 * @param tower the tower being selected by the user
+	 * @param towerDisks the deque of disks on the selected tower
+	 * @return the selected tower (VBox)
+	 */
+	private VBox setSelectedTower(VBox tower, Deque<Rectangle> towerDisks) {
+		// Get the top disk on the selected tower
+		Rectangle topDisk = towerDisks.peek();
+
+		// Log the disk selection if a disk exists on the tower
+		if (topDisk != null) {
+			moveLog.appendText("Picked up disk of width " + topDisk.getWidth() +
+					" from Tower " + getTowerNumber(tower) + "\n");
+		}
+
+		// Return the selected tower
+		return tower;
+	}
+
+	/**
+	 * Attempts to move a disk from the selected tower to the target tower.
+	 * Logs the move if successful or an error message if the move is invalid.
+	 *
+	 * @param targetTower      the tower to which the disk is being moved
+	 * @param targetTowerDisks the deque of disks on the target tower
+	 */
+	private void attemptMove(VBox targetTower, Deque<Rectangle> targetTowerDisks) {
+		// Check if the move is valid
+		if (isValidMove(targetTowerDisks, selectedTower)) {
+			// Retrieve the top disk from the selected tower
+			Rectangle movingDisk = getTopDisk(selectedTower);
+
+			// Log the move action
+			if (movingDisk != null) {
+				moveLog.appendText("Moved disk of width " + movingDisk.getWidth() +
+						" to Tower " + getTowerNumber(targetTower) + "\n");
+			}
+
+			// Execute the move
+			moveDisk(selectedTower, targetTower, targetTowerDisks);
+		} else {
+			// Log an invalid move attempt
+			moveLog.appendText("Invalid move. Cannot place larger disk on top of a smaller one.\n");
+		}
+
+		// Reset the selected tower
+		resetSelection();
 	}
 
 	/**
@@ -120,48 +165,76 @@ public class TowerOfHanoiController {
 		}
 	}
 
-
+	/**
+	 * Checks if the game is solved.
+	 * The game is considered solved if all disks are on the third tower
+	 * and arranged in ascending order from top (smallest) to bottom (largest).
+	 *
+	 * @return true if the game is solved; false otherwise
+	 */
 	private boolean isSolved() {
 		// First, check if the number of disks in tower3 matches the expected total
 		if (tower3ArrayDeque.size() != GameSettings.getInstance().getNumDisks()) {
-			return false;
-		} else {
-			// Next, check if the disks are in the correct order
-			double previousWidth = 0; // Initialize the previous width to 0 ensuring that the first disk's width will always be greater than previousWidth initially
-			for (Rectangle disk : tower3ArrayDeque) {
-				double currentDiskWidth = disk.getWidth(); // The for loop iterates over each disk in tower3ArrayDeque, starting from the bottom disk and moving upward.
-				//System.out.println("Checking disk with width: " + currentDiskWidth); // Debugging
-
-				if (currentDiskWidth < previousWidth) {
-					Logger.getLogger(TowerOfHanoiController.class.getName()).warning("Disks are out of order. Disk width " + currentDiskWidth + " is smaller than previous width " + previousWidth);
-					return false; // Disks are out of order
-				} else {
-					// Update the previous width for the next iteration by setting it to the current disk's width
-					previousWidth = currentDiskWidth;
-				}
-			}
-
-			Logger.getLogger(TowerOfHanoiController.class.getName()).info("All disks are in tower3 and in the correct order.");
-			return true;
+			return false; // If the number of disks is incorrect, the game is not solved
 		}
+		// Next, initialize the previous width to 0 ensuring that the first disk's width will always be greater than previousWidth initially
+		double previousWidth = 0;
+		// The for loop iterates over each disk in tower3ArrayDeque,
+		// starting from the last added disk (top disk) and moving down
+		for (Rectangle disk : tower3ArrayDeque) {
+			double currentDiskWidth = disk.getWidth();
+			/*System.out.println("Checking disk with width: " + currentDiskWidth); // Debugging*/
+
+			if (currentDiskWidth < previousWidth) {
+				Logger.getLogger(TowerOfHanoiController.class.getName()).warning("Disks are out of order. Disk width " + currentDiskWidth + " is smaller than previous width " + previousWidth);
+				return false; // Disks are out of order
+			} else {
+				// Update the previous width for the next iteration by setting it to the current disk's width
+				previousWidth = currentDiskWidth;
+			}
+		}
+
+		// If the loop completes without returning false, all disks are in correct ascending order
+		Logger.getLogger(TowerOfHanoiController.class.getName()).info("All disks are in tower3 and in the correct order.");
+		return true;
+
 	}
 
-
+	/**
+	 * Determines if a move is valid.
+	 * A move is valid if the target tower is empty or if the top disk of the source tower
+	 * is smaller than the top disk of the target tower.
+	 *
+	 * @param targetTowerDisks the deque representing the disks on the target tower
+	 * @param sourceTower      the VBox representing the source tower
+	 * @return true if the move is valid; false otherwise
+	 */
 	private boolean isValidMove(Deque<Rectangle> targetTowerDisks, VBox sourceTower) {
+		// If the target tower is empty, the move is automatically valid
 		if (targetTowerDisks.isEmpty()) {
 			return true;
 		}
 
+		// Retrieve the top disks of both source and target towers
 		Rectangle movingDisk = getTopDisk(sourceTower);
 		Rectangle targetTopDisk = targetTowerDisks.peek();
 
+		// Check for null to avoid NullPointerException, return false if either disk is null
 		if (movingDisk == null || targetTopDisk == null) {
 			return false;
 		}
-		return movingDisk.getWidth() < targetTopDisk.getWidth(); // Check if the moving disk is smaller than the target disk
+
+		// The move is valid if the moving disk is smaller than the target tower's top disk
+		return movingDisk.getWidth() < targetTopDisk.getWidth();
 	}
 
-
+	/**
+	 * Retrieves the top disk from the specified tower.
+	 * If the tower is empty, a warning message is displayed and null is returned.
+	 *
+	 * @param tower the tower from which to retrieve the top disk
+	 * @return the top disk from the tower; null if the tower is empty
+	 */
 	private Rectangle getTopDisk(VBox tower) {
 		if (tower.getChildren().isEmpty()) {
 			System.out.println("Warning: Attempted to get top disk from an empty tower.");
@@ -174,7 +247,7 @@ public class TowerOfHanoiController {
 		Rectangle disk = getTopDisk(sourceTower);
 		if (disk != null) {
 			/*System.out.println("Moving disk with width: " + disk.getWidth() + " from Tower " + getTowerNumber(sourceTower) +
-					" to Tower " + getTowerNumber(destinationTower));*/
+					" to Tower " + getTowerNumber(destinationTower)); // Debugging*/
 
 			/*// Debug before move
 			System.out.println("Source Deque before move: " + getSelectedTowerArrayDeque(sourceTower));
@@ -196,7 +269,7 @@ public class TowerOfHanoiController {
 
 			// Check if the game is solved
 			if (isSolved()) {
-				/*System.out.println("Game solved! Final state of destination deque: " + diskDequeDestination);*/
+				/*System.out.println("Game solved! Final state of destination deque: " + diskDequeDestination); //Debugging*/
 				wonGamePopUp();
 			}
 		}
