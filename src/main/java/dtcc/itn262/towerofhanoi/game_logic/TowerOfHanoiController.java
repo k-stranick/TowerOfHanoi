@@ -12,10 +12,11 @@ import javafx.scene.shape.Rectangle;
 import java.util.*;
 
 public class TowerOfHanoiController {
-
-	private final Deque<Rectangle> tower1ArrayDeque = new ArrayDeque<>(); // Stacks to keep track of disks on each tower
+	// Stacks to keep track of disks on each tower
+	private final Deque<Rectangle> tower1ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower2ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower3ArrayDeque = new ArrayDeque<>();
+
 	@FXML
 	private VBox tower1;
 	@FXML
@@ -65,7 +66,7 @@ public class TowerOfHanoiController {
 			moveLog.appendText("Picked up disk from Tower " + getTowerNumber(tower) + "\n");
 		} else if (selectedTower != null) {
 			// Reset selection
-			if (canPlaceDisk(towerDisks, selectedTower)) {
+			if (isValidMove(towerDisks, selectedTower)) {
 				// Move the disk to this tower
 				moveLog.appendText("Moved disk to Tower " + getTowerNumber(tower) + "\n");
 				moveDisk(selectedTower, tower, towerDisks);
@@ -76,19 +77,27 @@ public class TowerOfHanoiController {
 			selectedTower = null; // Reset selection
 		}
 	}
-
+	// Allows the user to go back to the main screen
+	@FXML
+	private void goBackToMainScreen() {
+		if (mainApp != null) {
+			mainApp.showSplashScreen();
+		}
+	}
 	// Check if the game is solved (all disks on the third tower)
 	private boolean isSolved() {
 		return tower3.getChildren().size() == GameSettings.getInstance().getNumDisks();
 	}
 
 
-	private boolean canPlaceDisk(Deque<Rectangle> targetTowerDisks, VBox fromRod) {
+	private boolean isValidMove(Deque<Rectangle> targetTowerDisks, VBox sourceTower) {
 		if (targetTowerDisks.isEmpty()) {
 			return true;
 		}
-		Rectangle movingDisk = getTopDisk(fromRod);
+
+		Rectangle movingDisk = getTopDisk(sourceTower);
 		Rectangle targetTopDisk = targetTowerDisks.peek();
+
 		if (movingDisk == null || targetTopDisk == null) {
 			return false;
 		}
@@ -96,21 +105,20 @@ public class TowerOfHanoiController {
 	}
 
 
-
 	private Rectangle getTopDisk(VBox tower) {
 		return (Rectangle) tower.getChildren().getFirst();
 	}
 
 
-	private void moveDisk(VBox fromRod, VBox toRod, Deque<Rectangle> toRodDisks) {
-		Rectangle disk = getTopDisk(fromRod);
+	private void moveDisk(VBox sourceTower, VBox destinationTower, Deque<Rectangle> diskDequeDestination) {
+		Rectangle disk = getTopDisk(sourceTower);
 		if (disk != null) {
-			fromRod.getChildren().remove(disk);
-			toRod.getChildren().addFirst(disk);
+			sourceTower.getChildren().remove(disk);
+			destinationTower.getChildren().addFirst(disk);
 
 			// Update stacks
-			getSelectedTowerArrayDeque(fromRod).pop();
-			toRodDisks.push(disk);
+			getSelectedTowerArrayDeque(sourceTower).pop();
+			diskDequeDestination.push(disk);
 			if (isSolved()) {
 				wonGamePopUp();
 			}
@@ -197,16 +205,54 @@ public class TowerOfHanoiController {
 		tower3.setDisable(true);
 
 		moveLog.appendText("\nPress 'Restart' to play again.\n");
-	}
+	}//TODO add clear undo/redo
 
+	/**
+	 * Sets the main application instance.
+	 * This method is used to set the reference to the main application,
+	 * allowing the controller to interact with the main application.
+	 *
+	 * @param mainApp the main application instance
+	 */
 	public void setMainApp(Main mainApp) {
 		this.mainApp = mainApp;
-	}
+	} // setting stage???
 
-	@FXML
-	private void goBackToMainScreen() {
-		if (mainApp != null) {
-			mainApp.showSplashScreen();
+
+
+	private static class Move {
+		private final VBox fromTower;
+		private final VBox toTower;
+		private final Deque<Rectangle> fromTowerDisks;
+		private final Deque<Rectangle> toTowerDisks;
+		private final Rectangle disk;
+
+		public Move(VBox fromTower, VBox toTower, Deque<Rectangle> fromTowerDisks, Deque<Rectangle> toTowerDisks, Rectangle disk) {
+			this.fromTower = fromTower;
+			this.toTower = toTower;
+			this.fromTowerDisks = fromTowerDisks;
+			this.toTowerDisks = toTowerDisks;
+			this.disk = disk;
+		}
+
+		public VBox getFromTower() {
+			return fromTower;
+		}
+
+		public VBox getToTower() {
+			return toTower;
+		}
+
+		public Deque<Rectangle> getFromTowerDisks() {
+			return fromTowerDisks;
+		}
+
+		public Deque<Rectangle> getToTowerDisks() {
+			return toTowerDisks;
+		}
+
+		public Rectangle getDisk() {
+			return disk;
 		}
 	}
 }
