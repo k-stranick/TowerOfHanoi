@@ -370,7 +370,7 @@ public class TowerOfHanoiController {
 		tower3.setDisable(true);
 
 		moveLog.appendText("\nPress 'Restart' to play again.\n");
-	}//TODO add clear undo/redo
+	}
 
 	/**
 	 * Sets the main application instance.
@@ -384,11 +384,11 @@ public class TowerOfHanoiController {
 	} // setting stage???
 
 
-	/**
+	/** Try to implement for undo/redo?
 	 * The following class is used to keep track of the moves made by the user.
 	 * This is used to implement the undo/redo functionality.
 	 */
-	private static class Move {
+	/*private static class Move {
 		private final VBox fromTower;
 		private final VBox toTower;
 		private final Rectangle disk;
@@ -410,6 +410,6 @@ public class TowerOfHanoiController {
 		public Rectangle getDisk() {
 			return disk;
 		}
-	}
+	}*/
 
 }
