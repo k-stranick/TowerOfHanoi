@@ -1,3 +1,10 @@
+/*
+* Kyle Stranick
+* ITN 262-401
+* Project: Tower of Hanoi
+* Due: 11/14/2024
+* */
+
 package dtcc.itn262.towerofhanoi.game_logic;
 
 import dtcc.itn262.towerofhanoi.entry_point.Main;
