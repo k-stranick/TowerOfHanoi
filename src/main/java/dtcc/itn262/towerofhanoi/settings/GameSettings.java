@@ -5,12 +5,14 @@
  * Due: 11/14/2024
  * */
 package dtcc.itn262.towerofhanoi.settings;
+
 // class designed to hold the number of disks (or difficulty) of the game
 public class GameSettings {
 	private static GameSettings instance;
 	private int numDisks;
 
-	private GameSettings() {}
+	private GameSettings() {
+	}
 
 	public static GameSettings getInstance() { // singleton pattern, to ensure only one instance of GameSettings, is created
 		if (instance == null) {

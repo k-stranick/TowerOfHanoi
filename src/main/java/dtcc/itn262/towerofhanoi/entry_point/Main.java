@@ -18,14 +18,14 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	private Stage primaryStage;
 
+	public static void main(String[] args) {
+		launch(args);
+	}
+
 	@Override
 	public void start(Stage primaryStage) {
 		this.primaryStage = primaryStage;
 		showSplashScreen();
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 	public void showSplashScreen() {
@@ -49,7 +49,7 @@ public class Main extends Application {
 			} else if (controllerClass == TowerOfHanoiController.class) {
 				((TowerOfHanoiController) controller).setMainApp(this);
 				int numDisks = GameSettings.getInstance().getNumDisks();
-				((TowerOfHanoiController) controller).initializeGame(numDisks);
+				((TowerOfHanoiController) controller).startNewGame(numDisks);
 			}
 			primaryStage.show();
 		} catch (Exception e) {

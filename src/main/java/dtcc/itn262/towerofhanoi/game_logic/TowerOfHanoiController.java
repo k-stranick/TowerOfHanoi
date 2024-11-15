@@ -1,9 +1,9 @@
 /*
-* Kyle Stranick
-* ITN 262-401
-* Project: Tower of Hanoi
-* Due: 11/14/2024
-* */
+ * Kyle Stranick
+ * ITN 262-401
+ * Project: Tower of Hanoi
+ * Due: 11/14/2024
+ * */
 
 package dtcc.itn262.towerofhanoi.game_logic;
 
@@ -11,9 +11,9 @@ import dtcc.itn262.towerofhanoi.entry_point.Main;
 import dtcc.itn262.towerofhanoi.settings.GameSettings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayDeque;
@@ -27,6 +27,9 @@ public class TowerOfHanoiController {
 	private final Deque<Rectangle> tower1ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower2ArrayDeque = new ArrayDeque<>();
 	private final Deque<Rectangle> tower3ArrayDeque = new ArrayDeque<>();
+	@FXML
+	public Label moveCounterLabel;
+	int moveCount = 0;
 	@FXML
 	private VBox tower1;
 	@FXML
@@ -45,7 +48,7 @@ public class TowerOfHanoiController {
 	 * @param numDisksEnteredByPlayer the number of disks entered by the player
 	 */
 	@FXML
-	public void initializeGame(int numDisksEnteredByPlayer) {
+	public void startNewGame(int numDisksEnteredByPlayer) {
 		setupDisks(numDisksEnteredByPlayer); // Initialize the game with the given number of disks
 	}
 
@@ -84,9 +87,12 @@ public class TowerOfHanoiController {
 
 		// Calculate the disk width based on the diskSizeFactor
 		Rectangle disk = new Rectangle(BASE_WIDTH * diskSizeFactor, DISK_HEIGHT);
-		disk.setFill(Color.BLUE);
+		disk.getStyleClass().add("disk"); // add the disk style class to the rectangle
+
+	/*	disk.setFill(Color.BLUE);
 		disk.setArcWidth(10); // Rounded corners for aesthetic
-		disk.setArcHeight(10); // Rounded corners for aesthetic
+		disk.setArcHeight(10); // Rounded corners for aesthetic*/
+
 
 		return disk;
 	}
@@ -95,29 +101,29 @@ public class TowerOfHanoiController {
 	 * Handles a tower click event, if no tower is currently selected, set the selected tower.
 	 * If a tower is already selected, attempts to move the disk to the clicked tower.
 	 *
-	 * @param clickedTower the tower clicked by the user
-	 * @param clickedTowerDisks the deque of disks on the clicked tower
+	 * @param clickedTower    the tower clicked by the user
+	 * @param towerDisksDeque the deque of disks on the clicked tower
 	 */
 	@FXML
-	private void handleTowerClick(VBox clickedTower, Deque<Rectangle> clickedTowerDisks) {
+	private void handleTowerClick(VBox clickedTower, Deque<Rectangle> towerDisksDeque) {
 		// If no tower is currently selected, set the clicked tower as the selected tower
-		if (selectedTower == null && !clickedTowerDisks.isEmpty()) {
-			selectedTower = setSelectedTower(clickedTower, clickedTowerDisks);
+		if (selectedTower == null && !towerDisksDeque.isEmpty()) {
+			selectedTower = selectTower(clickedTower, towerDisksDeque);
 		}
 		// If a tower is already selected, attempt to move the disk to the clicked tower
 		else if (selectedTower != null) {
-			attemptMove(clickedTower, clickedTowerDisks);
+			moveDiskIfValid(clickedTower, towerDisksDeque);
 		}
 	}
 
 	/**
 	 * Selects the specified tower and logs the selection of the top disk in the move log.
 	 *
-	 * @param tower the tower being selected by the user
+	 * @param tower      the tower being selected by the user
 	 * @param towerDisks the deque of disks on the selected tower
 	 * @return the selected tower (VBox)
 	 */
-	private VBox setSelectedTower(VBox tower, Deque<Rectangle> towerDisks) {
+	private VBox selectTower(VBox tower, Deque<Rectangle> towerDisks) {
 		// Get the top disk on the selected tower
 		Rectangle topDisk = towerDisks.peek();
 
@@ -138,7 +144,8 @@ public class TowerOfHanoiController {
 	 * @param targetTower      the tower to which the disk is being moved
 	 * @param targetTowerDisks the deque of disks on the target tower
 	 */
-	private void attemptMove(VBox targetTower, Deque<Rectangle> targetTowerDisks) {
+	private void moveDiskIfValid(VBox targetTower, Deque<Rectangle> targetTowerDisks) {
+
 		// Check if the move is valid
 		if (isValidMove(targetTowerDisks, selectedTower)) {
 			// Retrieve the top disk from the selected tower
@@ -152,6 +159,7 @@ public class TowerOfHanoiController {
 
 			// Execute the move
 			moveDisk(selectedTower, targetTower, targetTowerDisks);
+
 		} else {
 			// Log an invalid move attempt
 			moveLog.appendText("Invalid move. Cannot place larger disk on top of a smaller one.\n");
@@ -203,8 +211,8 @@ public class TowerOfHanoiController {
 
 		// If the loop completes without returning false, all disks are in correct ascending order
 		Logger.getLogger(TowerOfHanoiController.class.getName()).info("All disks are in tower3 and in the correct order.");
-		return true;
 
+		return true;
 	}
 
 	/**
@@ -270,6 +278,10 @@ public class TowerOfHanoiController {
 
 			diskDequeDestination.push(disk); // Add to the destination tower deque
 
+			// Increment move count and update label
+			moveCount++;
+			moveCounterLabel.setText("Moves: " + moveCount);
+
 			/*// Debug after move
 			System.out.println("Source Deque after move: " + getSelectedTowerArrayDeque(sourceTower));
 			System.out.println("Destination Deque after move: " + diskDequeDestination);*/
@@ -282,13 +294,11 @@ public class TowerOfHanoiController {
 		}
 	}
 
-
 	private Deque<Rectangle> getSelectedTowerArrayDeque(VBox tower) {
 		if (tower == tower1) return tower1ArrayDeque;
 		if (tower == tower2) return tower2ArrayDeque;
 		return tower3ArrayDeque;
 	}
-
 
 	private int getTowerNumber(VBox tower) {
 		if (tower == tower1) {
@@ -299,7 +309,6 @@ public class TowerOfHanoiController {
 			return 3;
 		}
 	}
-
 
 	@FXML
 	public void handleTower1Clicked() {
@@ -322,9 +331,12 @@ public class TowerOfHanoiController {
 		resetTowers();
 		clearMoveLog();
 		resetSelection();
+		// Reset move count and update label
+		moveCount = 0;
+		moveCounterLabel.setText("Moves: " + moveCount);
 		// Reinitialize game with the current number of disks
-		initializeGame(GameSettings.getInstance().getNumDisks());
-	} // TODO add undo/redo reset
+		startNewGame(GameSettings.getInstance().getNumDisks());
+	}
 
 	/**
 	 * Clears the move log text area.
@@ -368,7 +380,8 @@ public class TowerOfHanoiController {
 		Alert winAlert = new Alert(Alert.AlertType.INFORMATION);
 		winAlert.setTitle("Congratulations!");
 		winAlert.setHeaderText("You've solved the puzzle!");
-		winAlert.setContentText("All disks are now on the final tower. Great job!");
+		winAlert.setContentText("All disks are now on the final tower. Great job!\n" +
+				"You completed the game in " + moveCount + " moves.");
 		winAlert.showAndWait();
 
 		// Disable further interactions with the towers

@@ -1,0 +1,104 @@
+/* Background color for the entire application */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-background-color: #f0f4f7;
+}
+
+/* Style for the move counter label */
+.move-counter-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Style for towers */
+.tower {
+    -fx-border-color: #555;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #d0d4d9);
+    -fx-background-radius: 5;
+}
+
+/* Style for tower labels */
+.tower-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333;
+    -fx-padding: 5 0 0 0;
+}
+
+/* Style for the move log TextArea */
+.move-log {
+    -fx-font-size: 12px;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-fill: #333;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+/* Style for buttons */
+.game-button {
+    -fx-font-size: 14px;
+    -fx-text-fill: #fff;
+    -fx-background-color: #0078d7;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15;
+}
+
+.game-button:hover {
+    -fx-background-color: #005a9e;
+}
+
+/* Style for disks */
+.disk {
+    -fx-arc-width: 10;
+    -fx-arc-height: 10;
+    -fx-fill: linear-gradient(to bottom, #ffcf33, #ff9933);
+    -fx-stroke: #cc7a00;
+    -fx-stroke-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 4, 0.5, 0, 2);
+}
+
+/* Root style for the splash screen */
+.splash-root {
+    -fx-background-color: #f0f4f7;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+}
+
+/* Title label style */
+.title-label {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 20 0;
+}
+
+/* Instruction label style */
+.instruction-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #555;
+}
+
+/* ComboBox style */
+.disk-selection {
+    -fx-pref-width: 150px;
+    -fx-font-size: 16px;
+}
+
+/* Start button style */
+.start-button {
+    -fx-font-size: 18px;
+    -fx-text-fill: #fff;
+    -fx-background-color: #0078d7;
+    -fx-background-radius: 5;
+    -fx-padding: 10 20;
+}
+
+.start-button:hover {
+    -fx-background-color: #005a9e;
+}
+
+.start-button:pressed {
+    -fx-background-color: #004a7c;
+}
